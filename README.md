@@ -54,7 +54,7 @@ PepDesign is a research-grade pipeline for designing macrocyclic peptide binders
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/pepdesign.git
+git clone https://github.com/duyjimmypham/pepdesign.git
 cd pepdesign
 
 # Create virtual environment
@@ -334,9 +334,9 @@ If you use this pipeline in your research, please cite:
 ```bibtex
 @software{pepdesign2025,
   title = {PepDesign: A Modular Pipeline for Peptide Design},
-  author = {Your Name},
+  author = {Duy Pham},
   year = {2025},
-  url = {https://github.com/yourusername/pepdesign}
+  url = {https://github.com/duyjimmypham/pepdesign}
 }
 ```
 
@@ -362,9 +362,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Contact
 
-**Your Name** - [@yourtwitter](https://twitter.com/yourtwitter) - your.email@example.com
+**Duy Pham** - [GitHub](https://github.com/duyjimmypham)
 
-Project Link: [https://github.com/yourusername/pepdesign](https://github.com/yourusername/pepdesign)
+Project Link: [https://github.com/duyjimmypham/pepdesign](https://github.com/duyjimmypham/pepdesign)
 
 ---
 
