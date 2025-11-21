@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="banner.png" alt="PepDesign Banner" width="800">
+  <img src="banner.png" alt="PepDesign Banner" width="300">
 </p>
 
 # PepDesign - Modular Peptide Design Pipeline
