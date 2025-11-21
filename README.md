@@ -1,4 +1,6 @@
-![PepDesign Banner](banner.png)
+<p align="center">
+  <img src="banner.png" alt="PepDesign Banner" width="800">
+</p>
 
 # PepDesign - Modular Peptide Design Pipeline
 
