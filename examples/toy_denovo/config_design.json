@@ -1,0 +1,10 @@
+{
+  "backbones_dir": "output/backbones",
+  "output_csv": "output/sequences.csv",
+  "mode": "de_novo",
+  "num_sequences_per_backbone": 5,
+  "backend": "stub",
+  "constraints": {
+    "disallowed_residues_global": ["C"]
+  }
+}

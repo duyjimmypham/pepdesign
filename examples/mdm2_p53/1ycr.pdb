@@ -1,0 +1,25 @@
+HEADER    MDM2-P53 COMPLEX (MINIMAL STUB FOR TESTING)
+REMARK    This is a minimal stub PDB for testing the pipeline
+REMARK    Chain A: MDM2 (target protein)
+REMARK    Chain B: p53 peptide (ETFSDLWKLL)
+ATOM      1  CA  ALA A   1      10.000  10.000  10.000  1.00 20.00           C
+ATOM      2  CA  GLU A   2      13.800  10.000  10.000  1.00 20.00           C
+ATOM      3  CA  ASP A   3      17.600  10.000  10.000  1.00 20.00           C
+ATOM      4  CA  LEU A   4      21.400  10.000  10.000  1.00 20.00           C
+ATOM      5  CA  VAL A   5      25.200  10.000  10.000  1.00 20.00           C
+ATOM      6  CA  ILE A   6      29.000  10.000  10.000  1.00 20.00           C
+ATOM      7  CA  GLN A   7      32.800  10.000  10.000  1.00 20.00           C
+ATOM      8  CA  LYS A   8      36.600  10.000  10.000  1.00 20.00           C
+ATOM      9  CA  GLY A   9      40.400  10.000  10.000  1.00 20.00           C
+ATOM     10  CA  ALA A  10      44.200  10.000  10.000  1.00 20.00           C
+ATOM     11  CA  GLU B   1      20.000  15.000  10.000  1.00 20.00           C
+ATOM     12  CA  THR B   2      23.000  16.000  11.000  1.00 20.00           C
+ATOM     13  CA  PHE B   3      26.000  15.500  12.000  1.00 20.00           C
+ATOM     14  CA  SER B   4      28.500  14.000  10.500  1.00 20.00           C
+ATOM     15  CA  ASP B   5      30.000  12.000   9.000  1.00 20.00           C
+ATOM     16  CA  LEU B   6      30.500  10.000   7.000  1.00 20.00           C
+ATOM     17  CA  TRP B   7      29.500   8.000   5.500  1.00 20.00           C
+ATOM     18  CA  LYS B   8      27.000   7.000   4.000  1.00 20.00           C
+ATOM     19  CA  LEU B   9      24.000   7.500   3.500  1.00 20.00           C
+ATOM     20  CA  LEU B  10      21.000   8.500   4.000  1.00 20.00           C
+END

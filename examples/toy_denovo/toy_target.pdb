@@ -1,0 +1,13 @@
+HEADER    TOY TARGET FOR DE NOVO DESIGN
+REMARK    Chain A: Target protein (stub)
+ATOM      1  CA  ALA A   1      10.000  10.000  10.000  1.00 20.00           C
+ATOM      2  CA  GLU A   2      13.800  10.000  10.000  1.00 20.00           C
+ATOM      3  CA  ASP A   3      17.600  10.000  10.000  1.00 20.00           C
+ATOM      4  CA  LEU A   4      21.400  10.000  10.000  1.00 20.00           C
+ATOM      5  CA  VAL A   5      25.200  10.000  10.000  1.00 20.00           C
+ATOM      6  CA  ILE A   6      29.000  10.000  10.000  1.00 20.00           C
+ATOM      7  CA  GLN A   7      32.800  10.000  10.000  1.00 20.00           C
+ATOM      8  CA  LYS A   8      36.600  10.000  10.000  1.00 20.00           C
+ATOM      9  CA  GLY A   9      40.400  10.000  10.000  1.00 20.00           C
+ATOM     10  CA  ALA A  10      44.200  10.000  10.000  1.00 20.00           C
+END

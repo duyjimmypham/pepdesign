@@ -1,0 +1,8 @@
+{
+  "scored_csv": "output/scored.csv",
+  "output_csv": "output/ranked.csv",
+  "weight_charge": 0.3,
+  "weight_hydrophobic": 0.3,
+  "weight_filters": 0.4,
+  "reference_properties_json": "output/target/reference_properties.json"
+}

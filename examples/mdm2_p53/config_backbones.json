@@ -1,0 +1,8 @@
+{
+  "target_pdb": "output/target/target_clean.pdb",
+  "binding_site_json": "output/target/binding_site.json",
+  "output_dir": "output/backbones",
+  "num_backbones": 5,
+  "mode": "stub",
+  "existing_peptide_json": "output/target/existing_peptide.json"
+}

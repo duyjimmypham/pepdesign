@@ -1,0 +1,18 @@
+{
+  "backbones_dir": "output/backbones",
+  "output_csv": "output/sequences.csv",
+  "mode": "optimize_existing",
+  "num_sequences_per_backbone": 4,
+  "existing_peptide_json": "output/target/existing_peptide.json",
+  "backend": "stub",
+  "constraints": {
+    "fixed_positions_global": [3, 7],
+    "fixed_residues_global": ["F", "W"],
+    "disallowed_residues": {
+      "backbone_0": {
+        "1": ["C", "M"],
+        "5": ["C", "M"]
+      }
+    }
+  }
+}
