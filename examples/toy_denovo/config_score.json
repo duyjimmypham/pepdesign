@@ -1,9 +1,0 @@
-{
-  "sequences_csv": "output/sequences.csv",
-  "output_csv": "output/scored.csv",
-  "ph": 7.4,
-  "charge_min": -3.0,
-  "charge_max": 3.0,
-  "max_hydrophobic_fraction": 0.6,
-  "max_cys_count": 0
-}

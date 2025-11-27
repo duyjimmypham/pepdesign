@@ -6,6 +6,9 @@ pandas>=2.0.0
 numpy>=1.24.0
 scipy>=1.10.0
 
+# V0.2 Architecture dependencies
+pydantic>=2.0.0
+pandarallel>=1.6.0
+
 # Testing
 pytest>=7.0.0
-

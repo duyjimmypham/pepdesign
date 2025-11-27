@@ -48,20 +48,18 @@ htmlcov/
 .tox/
 .nox/
 
-# Project-specific
+# Project-specific outputs
 test_output/
 test_backbones/
 test_*.csv
 test_*.pdb
 dummy_*.pdb
-archive/
-examples/*/output/
 
-
-# Data directories (uncomment if needed)
-# data/
-# outputs/
-# results/
+# Pipeline output directories (exclude from git)
+output/
+output_v2/
+**/output/
+**/output_v2/
 
 # Logs
 *.log
@@ -71,3 +69,9 @@ logs/
 *.tmp
 *.bak
 .cache/
+debug_*.py
+debug_*.html
+
+# Data files (large PDB files from external sources)
+*.pdb.gz
+*.cif.gz

@@ -1,9 +1,0 @@
-{
-  "pdb_path": "toy_target.pdb",
-  "output_dir": "output/target",
-  "mode": "de_novo",
-  "target_chain": "A",
-  "binding_site_residues": [3, 4, 5, 6],
-  "contact_cutoff": 5.0,
-  "keep_cofactors": []
-}

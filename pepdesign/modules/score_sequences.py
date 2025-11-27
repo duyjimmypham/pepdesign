@@ -1,9 +1,12 @@
 """
 Sequence scoring module.
 Computes physicochemical properties and filters sequences.
+Optimized with parallel processing.
 """
 import pandas as pd
+import numpy as np
 from typing import Optional
+from pandarallel import pandarallel
 
 from pepdesign.utils import (
     load_csv,
@@ -33,59 +36,51 @@ def score_sequences(
 ) -> None:
     """
     Read designed peptide sequences, compute physicochemical scores, and filter.
-    
-    Args:
-        sequences_csv: Input CSV with at least 'peptide_seq' column
-        output_csv: Path to write scored CSV
-        ph: pH for net charge calculation
-        charge_min: Minimum allowed net charge (filter)
-        charge_max: Maximum allowed net charge (filter)
-        max_hydrophobic_fraction: Maximum allowed hydrophobic fraction (filter)
-        max_cys_count: Maximum allowed number of cysteines (filter)
-        
-    Writes:
-        CSV with added columns: net_charge, pI, hydrophobic_fraction, 
-        cys_count, agg_flag, passes_filters
+    Uses parallel processing for speed.
     """
     print(f"[ScoreSequences] Reading sequences from {sequences_csv}...")
     
     # Read input CSV
     df = load_csv(sequences_csv)
     
-    # Check required columns
     if 'peptide_seq' not in df.columns:
         raise ValueError("sequences_csv must contain 'peptide_seq' column")
     
-    print(f"[ScoreSequences] Computing physicochemical properties for {len(df)} sequences...")
+    print(f"[ScoreSequences] Computing physicochemical properties for {len(df)} sequences (Parallel)...")
     
-    # Compute properties using centralized chemistry functions
-    df['net_charge'] = df['peptide_seq'].apply(lambda seq: compute_net_charge(seq, ph))
-    df['pI'] = df['peptide_seq'].apply(estimate_pI)
-    df['hydrophobic_fraction'] = df['peptide_seq'].apply(hydrophobic_fraction)
-    df['cys_count'] = df['peptide_seq'].apply(count_cysteines)
-    df['agg_flag'] = df['peptide_seq'].apply(has_aggregation_motif)
+    # Initialize pandarallel
+    # verbose=1 shows progress bar
+    pandarallel.initialize(progress_bar=True, verbose=1)
     
-    # New properties
-    df['length'] = df['peptide_seq'].apply(sequence_length)
-    df['aromatic_fraction'] = df['peptide_seq'].apply(aromatic_fraction)
-    df['positive_fraction'] = df['peptide_seq'].apply(positive_fraction)
-    df['negative_fraction'] = df['peptide_seq'].apply(negative_fraction)
-    df['polar_fraction'] = df['peptide_seq'].apply(polar_fraction)
+    # Compute properties using parallel_apply
+    df['net_charge'] = df['peptide_seq'].parallel_apply(lambda seq: compute_net_charge(seq, ph))
+    df['pI'] = df['peptide_seq'].parallel_apply(estimate_pI)
+    df['hydrophobic_fraction'] = df['peptide_seq'].parallel_apply(hydrophobic_fraction)
+    df['cys_count'] = df['peptide_seq'].parallel_apply(count_cysteines)
+    df['agg_flag'] = df['peptide_seq'].parallel_apply(has_aggregation_motif)
     
-    # Apply filters
-    df['passes_filters'] = True
+    df['length'] = df['peptide_seq'].parallel_apply(sequence_length)
+    df['aromatic_fraction'] = df['peptide_seq'].parallel_apply(aromatic_fraction)
+    df['positive_fraction'] = df['peptide_seq'].parallel_apply(positive_fraction)
+    df['negative_fraction'] = df['peptide_seq'].parallel_apply(negative_fraction)
+    df['polar_fraction'] = df['peptide_seq'].parallel_apply(polar_fraction)
+    
+    # Apply filters (Vectorized)
+    mask = pd.Series(True, index=df.index)
     
     if charge_min is not None:
-        df.loc[df['net_charge'] < charge_min, 'passes_filters'] = False
+        mask &= (df['net_charge'] >= charge_min)
     
     if charge_max is not None:
-        df.loc[df['net_charge'] > charge_max, 'passes_filters'] = False
+        mask &= (df['net_charge'] <= charge_max)
     
     if max_hydrophobic_fraction is not None:
-        df.loc[df['hydrophobic_fraction'] > max_hydrophobic_fraction, 'passes_filters'] = False
+        mask &= (df['hydrophobic_fraction'] <= max_hydrophobic_fraction)
     
     if max_cys_count is not None:
-        df.loc[df['cys_count'] > max_cys_count, 'passes_filters'] = False
+        mask &= (df['cys_count'] <= max_cys_count)
+        
+    df['passes_filters'] = mask
     
     # Write output
     save_csv(df, output_csv)
@@ -102,14 +97,7 @@ def compute_reference_properties(
     output_json: str,
     ph: float = 7.4
 ) -> None:
-    """
-    Compute physicochemical properties for the reference peptide.
-    
-    Args:
-        existing_peptide_json: Path to existing_peptide.json (from prepare_target)
-        output_json: Path to write reference_properties.json
-        ph: pH for charge calculation
-    """
+    """Compute physicochemical properties for the reference peptide."""
     print(f"[ScoreSequences] Computing reference properties from {existing_peptide_json}...")
     
     data = load_json(existing_peptide_json)
