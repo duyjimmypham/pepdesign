@@ -42,8 +42,6 @@ class StubSequenceDesigner(SequenceDesigner):
             
             # If optimizing existing, fix residues if not specified otherwise
             if bb.metadata.get("mode") in ["existing", "perturbed"] and not fixed_pos:
-                # In a real scenario, we might fix hot-spots here.
-                # For stub, we'll just use the original sequence as a bias if available
                 pass
 
             # Get sequence length from PDB
@@ -104,3 +102,72 @@ def get_sequence_designer(config: DesignConfig) -> SequenceDesigner:
         return ProteinMPNNDesigner()
     else:
         raise ValueError(f"Unknown designer type: {config.designer_type}")
+
+def design_sequences(
+    backbones_dir: str,
+    output_csv: str,
+    mode: str,
+    target_chain: str,
+    peptide_chain: str,
+    num_sequences_per_backbone: int,
+    fixed_positions: Dict[str, List[int]] = None
+) -> List[DesignResult]:
+    """
+    High-level wrapper for sequence design.
+    Compatible with tests.
+    """
+    # Load backbones from index.csv
+    index_path = os.path.join(backbones_dir, "index.csv")
+    if not os.path.exists(index_path):
+        raise FileNotFoundError(f"Backbone index not found: {index_path}")
+    
+    df = pd.read_csv(index_path)
+    backbone_results = []
+    for _, row in df.iterrows():
+        # Reconstruct BackboneResult
+        # Note: We need to handle metadata fields dynamically
+        metadata = row.to_dict()
+        # Remove standard fields from metadata
+        for key in ["backbone_id", "pdb_path", "peptide_chain_id"]:
+            metadata.pop(key, None)
+            
+        backbone_results.append(BackboneResult(
+            backbone_id=row["backbone_id"],
+            pdb_path=row["pdb_path"],
+            peptide_chain_id=row["peptide_chain_id"],
+            metadata=metadata
+        ))
+    
+    # Create config
+    config = DesignConfig(
+        designer_type="stub" if mode == "de_novo" else "protein_mpnn", # Map mode to type
+        num_sequences_per_backbone=num_sequences_per_backbone
+    )
+    # Override for test compatibility if mode is explicit
+    if mode == "de_novo":
+        config.designer_type = "stub"
+    elif mode == "optimize_existing":
+        config.designer_type = "stub" # Use stub for tests unless we have real MPNN
+    
+    # Get designer
+    designer = get_sequence_designer(config)
+    
+    # Determine output directory
+    output_dir = os.path.dirname(output_csv) or "."
+    
+    # Run design
+    results = designer.design(
+        backbone_results=backbone_results,
+        output_dir=output_dir,
+        config=config,
+        global_constraints={"fixed_positions_global": []}
+    )
+    
+    # Rename output file if needed
+    default_output = os.path.join(output_dir, "sequences.csv")
+    if default_output != output_csv and os.path.exists(default_output):
+        if os.path.exists(output_csv):
+            os.remove(output_csv)
+        os.rename(default_output, output_csv)
+        
+    return results

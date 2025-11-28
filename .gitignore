@@ -39,7 +39,8 @@ env/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-*.ipynb
+# Allow example notebooks
+# *.ipynb
 
 # Testing
 .pytest_cache/
@@ -50,6 +51,8 @@ htmlcov/
 
 # Project-specific outputs
 test_output/
+test_*_output/
+test_*_output_*/
 test_backbones/
 test_*.csv
 test_*.pdb
@@ -68,6 +71,7 @@ logs/
 # Temporary files
 *.tmp
 *.bak
+*.zip
 .cache/
 debug_*.py
 debug_*.html
@@ -75,3 +79,21 @@ debug_*.html
 # Data files (large PDB files from external sources)
 *.pdb.gz
 *.cif.gz
+
+# Model weights and parameters (CRITICAL: Do not commit these per license agreements)
+# AlphaFold2/3, Chai-1, RFdiffusion, ProteinMPNN, DiffPepBuilder model parameters
+models/
+**/models/
+*.pt
+*.pth
+*.ckpt
+*.params
+*.weights
+*.h5
+*.pkl
+af2_weights/
+af3_weights/
+chai_weights/
+rfdiffusion_weights/
+proteinmpnn_weights/
+diffpepbuilder_weights/

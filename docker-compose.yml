@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  rfdiffusion:
+    build:
+      context: .
+      dockerfile: docker/rfdiffusion/Dockerfile
+    image: rfdiffusion:latest
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./models/rfdiffusion:/models
+      - ./data:/data
+    command: ["python3", "scripts/run_inference.py", "--help"]
+
+  proteinmpnn:
+    build:
+      context: .
+      dockerfile: docker/proteinmpnn/Dockerfile
+    image: proteinmpnn:latest
+    volumes:
+      - ./data:/data
+    command: ["python", "protein_mpnn_run.py", "--help"]
+
+  diffpepbuilder:
+    build:
+      context: .
+      dockerfile: docker/diffpepbuilder/Dockerfile
+    image: diffpepbuilder:latest
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./models/diffpepbuilder:/models
+      - ./data:/data
+    command: ["python3", "inference.py", "--help"]
+
+  colabfold:
+    build:
+      context: .
+      dockerfile: docker/colabfold/Dockerfile
+    image: colabfold:latest
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - COLABFOLD_DB=/databases
+    volumes:
+      - ./models/alphafold2:/databases
+      - ./data:/data
+    command: ["colabfold_batch", "--help"]
+
+  alphafold3:
+    build:
+      context: .
+      dockerfile: docker/alphafold3/Dockerfile
+    image: alphafold3:latest
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - AF3_MODEL_DIR=/models
+    volumes:
+      - ./models/alphafold3:/models
+      - ./models/alphafold3_databases:/databases
+      - ./data:/data
+    command: ["python3", "run_alphafold.py", "--help"]
+
+# Usage:
+# Build all images: docker-compose build
+# Run specific service: docker-compose run rfdiffusion <args>
+# Example: docker-compose run rfdiffusion python3 scripts/run_inference.py --input /data/input.pdb

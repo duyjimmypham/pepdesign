@@ -34,7 +34,7 @@ class PepDesignPipeline:
     def _set_seeds(self, seed: int):
         random.seed(seed)
         np.random.seed(seed)
-        # torch.manual_seed(seed) # If using torch
+        np.random.seed(seed)
         
     def run(self):
         """Execute the full pipeline."""
@@ -43,7 +43,7 @@ class PepDesignPipeline:
         
         # 1. Prepare Target
         print("\n[Step 1] Preparing Target...")
-        prep_result = prepare_target(
+        target_state = prepare_target(
             pdb_path=self.config.target.pdb_path,
             output_dir=self.ctx.dirs["target"],
             mode=self.config.target.mode,
@@ -51,33 +51,30 @@ class PepDesignPipeline:
             binding_site_residues=self.config.target.binding_site_residues,
             peptide_chain=self.config.target.peptide_chain,
             contact_cutoff=self.config.target.contact_cutoff,
-            keep_cofactors=self.config.target.keep_cofactors
+            keep_cofactors=self.config.target.keep_cofactors,
+            do_relax=True
         )
         
-        # Load binding site data
-        with open(self.ctx.binding_site_json, 'r') as f:
-            binding_site_data = json.load(f)
-            
-        existing_peptide_data = None
-        if self.config.target.mode == "optimize_existing":
-            with open(self.ctx.existing_peptide_json, 'r') as f:
-                existing_peptide_data = json.load(f)
-                
-            # Compute reference properties
+        # Handle reference properties if optimizing
+        if target_state.peptide_info:
             compute_reference_properties(
-                existing_peptide_json=self.ctx.existing_peptide_json,
+                existing_peptide_source=target_state.peptide_info,
                 output_json=self.ctx.reference_properties_json,
                 ph=self.config.scoring.ph
             )
 
         # 2. Generate Backbones
         print("\n[Step 2] Generating Backbones...")
+        
+        # Convert BindingSiteModel to dict for compatibility
+        bs_data = target_state.binding_site.dict()
+        
         backbone_results = self.backbone_generator.generate(
-            target_pdb=self.ctx.clean_target_pdb,
-            binding_site_data=binding_site_data,
+            target_pdb=target_state.best_pdb_path,
+            binding_site_data=bs_data,
             output_dir=self.ctx.dirs["backbones"],
             config=self.config.backbone,
-            existing_peptide_data=existing_peptide_data
+            existing_peptide_data=target_state.peptide_info.dict() if target_state.peptide_info else None
         )
         
         # 3. Design Sequences
@@ -118,8 +115,19 @@ class PepDesignPipeline:
             reference_properties_json=self.ctx.reference_properties_json if self.config.target.mode == "optimize_existing" else None
         )
         
-        # 6. Generate Report
-        print("\n[Step 6] Generating Report...")
+        # 6. Predict Structures (Optional)
+        if self.config.prediction.predictor_type != "none":
+            from pepdesign.modules.predict_structures import predict_structures
+            
+            predict_structures(
+                ranked_csv=self.ctx.ranked_csv,
+                output_dir=self.ctx.dirs["predictions"],
+                config=self.config.prediction,
+                target_pdb=target_state.best_pdb_path
+            )
+        
+        # 7. Generate Report
+        print("\n[Step 7] Generating Report...")
         from pepdesign.reporting import generate_html_report
         
         generate_html_report(

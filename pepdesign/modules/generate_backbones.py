@@ -120,7 +120,7 @@ class StubBackboneGenerator(BackboneGenerator):
             target_structure = load_structure(target_pdb)
             target_model = target_structure[0]
             
-            # Remove existing chain B if present (TODO: Parameterize this)
+            # Remove existing chain B if present
             target_peptide_chain_id = "B" 
             if target_peptide_chain_id in target_model:
                 target_model.detach_child(target_peptide_chain_id)
@@ -216,6 +216,43 @@ def get_backbone_generator(config: BackboneConfig) -> BackboneGenerator:
     if config.generator_type == "stub":
         return StubBackboneGenerator()
     elif config.generator_type == "rfdiffusion":
-        raise NotImplementedError("RFdiffusion generator not yet implemented")
+        from pepdesign.external.rfdiffusion import RFdiffusionGenerator
+        return RFdiffusionGenerator()
+    elif config.generator_type == "diffpepbuilder":
+        from pepdesign.external.diffpepbuilder import DiffPepBuilderGenerator
+        return DiffPepBuilderGenerator()
     else:
         raise ValueError(f"Unknown generator type: {config.generator_type}")
+
+def generate_backbones(
+    target_pdb: str,
+    binding_site_json: str,
+    output_dir: str,
+    num_backbones: int,
+    peptide_length: int,
+    mode: str = "stub"
+) -> List[BackboneResult]:
+    """
+    High-level wrapper for backbone generation.
+    Compatible with tests.
+    """
+    # Load binding site data
+    binding_site_data = load_json(binding_site_json)
+    
+    # Create config
+    config = BackboneConfig(
+        generator_type=mode,
+        num_backbones=num_backbones,
+        peptide_length=peptide_length
+    )
+    
+    # Get generator
+    generator = get_backbone_generator(config)
+    
+    # Generate
+    return generator.generate(
+        target_pdb=target_pdb,
+        binding_site_data=binding_site_data,
+        output_dir=output_dir,
+        config=config
+    )

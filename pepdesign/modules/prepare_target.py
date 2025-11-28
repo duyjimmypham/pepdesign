@@ -10,6 +10,8 @@ from typing import List, Optional, Tuple, Dict
 from Bio.PDB import NeighborSearch
 from Bio.PDB.Polypeptide import is_aa
 
+from pepdesign.models import TargetState, BindingSiteModel, PeptideInfo
+
 # Import centralized utilities
 from pepdesign.utils import (
     load_structure,
@@ -55,7 +57,8 @@ def prepare_target(
     peptide_chain: Optional[str] = None,
     contact_cutoff: float = 5.0,
     keep_cofactors: Optional[List[str]] = None,
-) -> Dict[str, Optional[str]]:
+    do_relax: bool = True
+) -> TargetState:
     """
     Prepare cleaned target structure and binding-site metadata.
     
@@ -68,14 +71,10 @@ def prepare_target(
         peptide_chain: Peptide chain ID (for optimize_existing)
         contact_cutoff: Distance cutoff for binding site detection (Å)
         keep_cofactors: List of cofactor residue names to keep
+        do_relax: Whether to run RosettaRelax
         
     Returns:
-        Dictionary with output file paths:
-        {
-            "clean_pdb": path to target_clean.pdb,
-            "binding_site_json": path to binding_site.json,
-            "existing_peptide_json": path or None
-        }
+        TargetState object
     """
     os.makedirs(output_dir, exist_ok=True)
     
@@ -99,7 +98,7 @@ def prepare_target(
     bs_center: Tuple[float, float, float] = (0.0, 0.0, 0.0)
     bs_radius: float = 8.0
     bs_source: str = "unknown"
-    existing_peptide_json = None
+    peptide_info: Optional[PeptideInfo] = None
     
     if mode == "optimize_existing":
         if not peptide_chain:
@@ -141,16 +140,13 @@ def prepare_target(
                 except KeyError:
                     pass
         
-        existing_pep_data = {
-            "chain_id": peptide_chain,
-            "sequence": pep_seq,
-            "residue_indices": pep_res_indices,
-            "original_pdb_path": pdb_path  # Store original PDB path for backbone extraction
-        }
+        peptide_info = PeptideInfo(
+            chain_id=peptide_chain,
+            sequence=pep_seq,
+            residue_indices=pep_res_indices,
+            original_pdb_path=pdb_path
+        )
         
-        existing_peptide_json = os.path.join(output_dir, "existing_peptide.json")
-        save_json(existing_pep_data, existing_peptide_json)
-    
     elif mode == "de_novo":
         if binding_site_residues:
             # Manual binding site
@@ -180,8 +176,8 @@ def prepare_target(
     else:
         raise ValueError(f"Unknown mode: {mode}")
     
-    # Save binding site metadata
-    bs_data = BindingSite(
+    # Create BindingSiteModel
+    bs_model = BindingSiteModel(
         chain_id=target_chain,
         residue_indices=bs_residues,
         center=bs_center,
@@ -189,11 +185,30 @@ def prepare_target(
         source=bs_source
     )
     
+    # Save binding site metadata
     binding_site_json = os.path.join(output_dir, "binding_site.json")
-    save_json(asdict(bs_data), binding_site_json)
+    save_json(bs_model.dict(), binding_site_json)
     
-    return {
-        "clean_pdb": clean_pdb_path,
-        "binding_site_json": binding_site_json,
-        "existing_peptide_json": existing_peptide_json
-    }
+    # Relaxation Step
+    relaxed_pdb_path = None
+    if do_relax:
+        # Use OpenMM by default as requested
+        from pepdesign.external.openmm import get_openmm_relaxer
+        relaxer = get_openmm_relaxer()
+        relaxed_pdb_path = os.path.join(output_dir, "target_relaxed.pdb")
+        try:
+            relaxer.relax(clean_pdb_path, relaxed_pdb_path)
+        except Exception as e:
+            print(f"[Warning] OpenMM Relaxation failed: {e}")
+            # Fallback to Rosetta? Or just fail? 
+            # User said "Keep RosettaRelaxer for now for future integration", implying OpenMM is the primary.
+            # We'll just log warning and continue without relaxation if it fails.
+            relaxed_pdb_path = None
+
+    return TargetState(
+        pdb_path=clean_pdb_path,
+        relaxed_pdb_path=relaxed_pdb_path,
+        binding_site=bs_model,
+        sequence=None, # Could extract sequence here if needed
+        peptide_info=peptide_info
+    )

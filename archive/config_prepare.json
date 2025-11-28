@@ -1,9 +1,0 @@
-{
-  "pdb_path": "1ycr.pdb",
-  "output_dir": "output/target",
-  "mode": "optimize_existing",
-  "target_chain": "A",
-  "peptide_chain": "B",
-  "contact_cutoff": 5.0,
-  "keep_cofactors": []
-}

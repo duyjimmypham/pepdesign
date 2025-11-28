@@ -92,19 +92,29 @@ def score_sequences(
     print(f"  - Passed filters: {num_passed}")
     print(f"  - Filtered out: {num_filtered}")
 
+from typing import Union, Dict
+from pepdesign.models import PeptideInfo
+
 def compute_reference_properties(
-    existing_peptide_json: str,
+    existing_peptide_source: Union[str, Dict, PeptideInfo],
     output_json: str,
     ph: float = 7.4
 ) -> None:
     """Compute physicochemical properties for the reference peptide."""
-    print(f"[ScoreSequences] Computing reference properties from {existing_peptide_json}...")
+    print(f"[ScoreSequences] Computing reference properties...")
     
-    data = load_json(existing_peptide_json)
-    sequence = data.get("sequence", "")
-    
+    sequence = ""
+    if isinstance(existing_peptide_source, str):
+        # File path
+        data = load_json(existing_peptide_source)
+        sequence = data.get("sequence", "")
+    elif isinstance(existing_peptide_source, dict):
+        sequence = existing_peptide_source.get("sequence", "")
+    elif isinstance(existing_peptide_source, PeptideInfo):
+        sequence = existing_peptide_source.sequence
+        
     if not sequence:
-        print("  Warning: No sequence found in existing_peptide.json")
+        print("  Warning: No sequence found in existing_peptide source")
         return
         
     props = {

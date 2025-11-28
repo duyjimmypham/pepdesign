@@ -21,6 +21,7 @@ class ProjectContext:
             "designs": os.path.join(self.root_dir, "designs"),
             "scoring": os.path.join(self.root_dir, "scoring"),
             "ranking": os.path.join(self.root_dir, "ranking"),
+            "predictions": os.path.join(self.root_dir, "predictions"),
             "logs": os.path.join(self.root_dir, "logs"),
         }
         

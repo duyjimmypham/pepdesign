@@ -40,7 +40,7 @@ class TargetConfig(BaseModel):
 
 class BackboneConfig(BaseModel):
     """Configuration for backbone generation."""
-    generator_type: Literal["stub", "rfdiffusion"] = Field("stub", description="Backbone generation backend")
+    generator_type: Literal["stub", "rfdiffusion", "diffpepbuilder"] = Field("stub", description="Backbone generation backend")
     num_backbones: int = Field(10, ge=1, description="Number of backbones to generate")
     peptide_length: Optional[int] = Field(None, ge=3, description="Length of peptide (required for de_novo)")
     
@@ -59,13 +59,21 @@ class DesignConfig(BaseModel):
     disallowed_residues_global: Optional[List[str]] = None
 
 class ScoringConfig(BaseModel):
-    """Configuration for scoring and filtering."""
-    ph: float = Field(7.4, ge=0.0, le=14.0, description="pH for charge calculation")
-    charge_min: Optional[float] = None
-    charge_max: Optional[float] = None
-    max_hydrophobic_fraction: Optional[float] = Field(None, ge=0.0, le=1.0)
-    max_cys_count: Optional[int] = None
+    """Configuration for sequence scoring and filtering."""
+    ph: float = Field(7.4, description="pH for charge calculations")
+    charge_min: Optional[float] = Field(None, description="Minimum net charge")
+    charge_max: Optional[float] = Field(None, description="Maximum net charge")
+    max_hydrophobic_fraction: Optional[float] = Field(None, description="Maximum hydrophobic fraction")
+    max_cys_count: Optional[int] = Field(None, description="Maximum cysteine count")
 
+class PredictionConfig(BaseModel):
+    """Configuration for structure prediction."""
+    predictor_type: Literal["none", "alphafold2", "alphafold3", "chai1"] = Field("none", description="Structure prediction backend")
+    num_models: int = Field(1, ge=1, le=5, description="Number of models to predict per sequence")
+    use_templates: bool = Field(False, description="Use template-based modeling (AlphaFold2 only)")
+    top_n: int = Field(5, ge=1, description="Predict structures for top N sequences only")
+    model_dir: Optional[str] = Field(None, description="Path to model parameters (required for AlphaFold3)")
+    
 class PipelineConfig(BaseModel):
     """Master configuration for the entire pipeline."""
     global_settings: GlobalConfig
@@ -73,3 +81,4 @@ class PipelineConfig(BaseModel):
     backbone: BackboneConfig
     design: DesignConfig
     scoring: ScoringConfig
+    prediction: PredictionConfig = Field(default_factory=PredictionConfig)

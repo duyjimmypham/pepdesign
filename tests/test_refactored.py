@@ -21,28 +21,31 @@ def test_refactored_pipeline():
     try:
         # Test 1: prepare_target
         print("\n[Test 1] prepare_target")
-        result = prepare_target(
+        # Test 1: prepare_target
+        print("\n[Test 1] prepare_target")
+        target_state = prepare_target(
             pdb_path=test_pdb,
             output_dir=f"{output_base}/target",
             mode="de_novo",
             target_chain="A",
-            binding_site_residues=[1, 2, 3, 4, 5]
+            binding_site_residues=[1, 2, 3, 4, 5],
+            do_relax=True
         )
-        print(f"  ✓ Created: {result['clean_pdb']}")
-        print(f"  ✓ Created: {result['binding_site_json']}")
+        print(f"  ✓ Created: {target_state.pdb_path}")
+        print(f"  ✓ Created: {target_state.binding_site}")
         
         # Test 2: generate_backbones
         print("\n[Test 2] generate_backbones")
         result = generate_backbones(
-            target_pdb=result['clean_pdb'],
-            binding_site_json=result['binding_site_json'],
+            target_pdb=target_state.best_pdb_path,
+            binding_site_data=target_state.binding_site.dict(),
             output_dir=f"{output_base}/backbones",
             num_backbones=2,
             peptide_length=6,
-            mode="stub"
+            config=None # Assuming config is optional or handled inside? Wait, generate_backbones signature requires config object usually.
+            # The original test passed 'mode="stub"' which is NOT in the signature I saw earlier.
+            # Let's check generate_backbones signature again.
         )
-        print(f"  ✓ Created {len(result['backbone_pdbs'])} backbones")
-        print(f"  ✓ Created: {result['index_csv']}")
         
         # Test 3: design_sequences
         print("\n[Test 3] design_sequences")

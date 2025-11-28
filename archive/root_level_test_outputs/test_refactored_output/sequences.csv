@@ -1,7 +1,0 @@
-backbone_id,design_id,peptide_seq,mpnn_log_prob,mode,target_chain,peptide_chain
-backbone_0,backbone_0_seq_0,LGTSTQ,-5.072871576267089,de_novo,A,B
-backbone_0,backbone_0_seq_1,HDIMIG,-7.750229552939665,de_novo,A,B
-backbone_0,backbone_0_seq_2,KQNNAH,-5.074897919523631,de_novo,A,B
-backbone_1,backbone_1_seq_0,GDHRCY,-5.655438788705941,de_novo,A,B
-backbone_1,backbone_1_seq_1,LTRCKI,-7.166964541162337,de_novo,A,B
-backbone_1,backbone_1_seq_2,TTCMGH,-6.741461072120437,de_novo,A,B
